@@ -12,4 +12,4 @@ Actuators:
 SG90 Micro Servo Motors (3 pcs):Precise mini motors used to physically operate the garage door, main entrance, and the clothes rack mechanism.
 Prototyping & Connections:
 MB-102 Solderless Breadboard (1 pc):Used to prototype and connect all components safely without soldering.
-Ribbon Jumper Wires (Male-to-Male & Male-to-Female): Multi-colored cables used for routing logic pins, 5V power, and GND lines between the Arduino and components.
+Ribbon Jumper Wires (Male-to-Male & Male-to-Female): Multi-colored cables used for routing logic pins, and GND lines between the Arduino and components.
