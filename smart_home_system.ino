@@ -1,95 +1,95 @@
 #include <Servo.h>
 
-// SERVOLARIN TƏYİNİ 
-Servo qarajServosu;
-Servo evServosu;
-Servo paltarServosu;
+// SERVO DEFINITIONS
+Servo garageServo;
+Servo homeServo;
+Servo clothesServo;
 
-// PİNLƏRİN TƏYİNİ 
-// Qaraj Sistemi
-const int qarajTrig = 9;
-const int qarajEcho = 10;
-const int qarajServoPin = 11;
+// PIN CONFIGURATIONS
+// Garage System
+const int garageTrig = 9;
+const int garageEcho = 10;
+const int garageServoPin = 11;
 
-// Ev Qapısı Sistemi
-const int evTrig = 4;
-const int evEcho = 3;
-const int evServoPin = 7;
+// Home Door System
+const int homeTrig = 4;
+const int homeEcho = 3;
+const int homeServoPin = 7;
 
-// Yağış və Paltar Sistemi
-const int yagisPin = 6; // Yağış sensorunun DO (Digital Output) pini
-const int paltarServoPin = 5;
+// Rain and Clothes Rack System
+const int rainPin = 6; // DO (Digital Output) pin of the rain sensor
+const int clothesServoPin = 5;
 
 void setup() {
-  // Serial Monitoru başladırıq (Yoxlamaq üçün)
+  // Initialize Serial Monitor for debugging
   Serial.begin(9600);
 
-  // Servoları pinlərə bağlayırıq
-  qarajServosu.attach(qarajServoPin);
-  evServosu.attach(evServoPin);
-  paltarServosu.attach(paltarServoPin);
+  // Attach servos to their respective pins
+  garageServo.attach(garageServoPin);
+  homeServo.attach(homeServoPin);
+  clothesServo.attach(clothesServoPin);
 
-  // Sensor pinlərinin giriş/çıxış nizamlamaları
-  pinMode(qarajTrig, OUTPUT);
-  pinMode(qarajEcho, INPUT);
+  // Configure sensor pin modes (Input/Output)
+  pinMode(garageTrig, OUTPUT);
+  pinMode(garageEcho, INPUT);
   
-  pinMode(evTrig, OUTPUT);
-  pinMode(evEcho, INPUT);
+  pinMode(homeTrig, OUTPUT);
+  pinMode(homeEcho, INPUT);
   
-  pinMode(yagisPin, INPUT); // Yağış sensoru girişdir
+  pinMode(rainPin, INPUT); // Rain sensor is configured as INPUT
 
-  // BAŞLANGIC VƏZİYYƏTİ (Proqram başlayanda hər şey bağlı/təhlükəsiz olsun)
-  qarajServosu.write(0); // Qaraj qapısı bağlı
-  evServosu.write(0); // Ev qapısı bağlı
-  paltarServosu.write(0); // Paltarlar çöldə (yağış yoxdur)
+  // INITIAL STATE (Ensuring everything is closed/safe on startup)
+  garageServo.write(0);  // Garage door is closed
+  homeServo.write(0);    // Home door is closed
+  clothesServo.write(0); // Clothes rack is outside (no rain)
 }
 
 void loop() {
-  // 1. QARAJ QAPISI SİSTEMİ (Məsafə ölçümü və idarəetmə)
-  long qarajMuddet, qarajMesafe;
-  digitalWrite(qarajTrig, LOW);
+  // 1. GARAGE DOOR SYSTEM (Distance measurement and control)
+  long garageDuration, garageDistance;
+  digitalWrite(garageTrig, LOW);
   delayMicroseconds(2);
-  digitalWrite(qarajTrig, HIGH);
+  digitalWrite(garageTrig, HIGH);
   delayMicroseconds(10);
-  digitalWrite(qarajTrig, LOW);
-  qarajMuddet = pulseIn(qarajEcho, HIGH);
-  qarajMesafe = qarajMuddet * 0.034 / 2;
+  digitalWrite(garageTrig, LOW);
+  garageDuration = pulseIn(garageEcho, HIGH);
+  garageDistance = garageDuration * 0.034 / 2;
 
-  if (qarajMesafe > 0 && qarajMesafe <= 25) { // Maşın 25 sm-dən yaxındırsa
-    qarajServosu.write(90); // Qapını aç
-    delay(3000);
+  if (garageDistance > 0 && garageDistance <= 25) { // If car is closer than 25 cm
+    garageServo.write(90); // Open the garage door
+    delay(3000);           // Keep open for 3 seconds
   } else {
-    qarajServosu.write(0); // Yoxdursa bağla
+    garageServo.write(0);  // Otherwise, close the door
   }
 
-  // 2. EV QAPISI SİSTEMİ (Məsafə ölçümü və idarəetmə)
-  long evMuddet, evMesafe;
-  digitalWrite(evTrig, LOW);
+  // 2. HOME DOOR SYSTEM (Distance measurement and control)
+  long homeDuration, homeDistance;
+  digitalWrite(homeTrig, LOW);
   delayMicroseconds(2);
-  digitalWrite(evTrig, HIGH);
+  digitalWrite(homeTrig, HIGH);
   delayMicroseconds(10);
-  digitalWrite(evTrig, LOW);
-  evMuddet = pulseIn(evEcho, HIGH);
-  evMesafe = evMuddet * 0.034 / 2;
+  digitalWrite(homeTrig, LOW);
+  homeDuration = pulseIn(homeEcho, HIGH);
+  homeDistance = homeDuration * 0.034 / 2;
 
-  if (evMesafe > 0 && evMesafe <= 15) { // İnsan 15 sm-dən yaxındırsa
-    evServosu.write(90); // Ev qapısını aç
-    delay(3000);
+  if (homeDistance > 0 && homeDistance <= 15) { // If person is closer than 15 cm
+    homeServo.write(90); // Open the home door
+    delay(3000);         // Keep open for 3 seconds
   } else {
-    evServosu.write(0); // Yoxdursa bağla
+    homeServo.write(0);  // Otherwise, close the door
   }
 
-  // 3. YAĞIŞ VƏ PALTARASQISI SİSTEMİ
-  int yagisVeziyyeti = digitalRead(yagisPin);
+  // 3. RAIN AND CLOTHES RACK SYSTEM
+  int rainStatus = digitalRead(rainPin);
 
-  // Diqqət: Yağış sensorları adətən su dəyəndə LOW (0) siqnalı verir
-  if (yagisVeziyyeti == LOW) { 
-    paltarServosu.write(90); // Yağış yağırsa, asqını içəri çək (90 dərəcə)
-    Serial.println("Yagis yagir! Paltarlar iceri cekildi.");
+  // Note: Rain sensors typically output LOW (0) when water is detected
+  if (rainStatus == LOW) { 
+    clothesServo.write(90); // If it rains, retract the rack inside (90 degrees)
+    Serial.println("Rain detected! Clothes rack retracted inside.");
   } else {
-    paltarServosu.write(0); // Yağış kəsilsə, asqını yenidən çölə çıxart (0 dərəcə)
+    clothesServo.write(0);  // When rain stops, extend the rack outside (0 degrees)
   }
 
-  // Sistemi yormamaq və stabil işləmək üçün kiçik fasilə
+  // Small delay to prevent MCU overload and maintain stability
   delay(100);
 }
